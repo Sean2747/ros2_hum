@@ -24,9 +24,22 @@ def generate_launch_description():
         launch_arguments={'slam_params_file': '/home/sccoutmini/ros2_hum/src/scout_bringup/config/mapper_params_online_async.yaml', 'use_sim_time': 'true'}.items()
     )
 
+    twist_mux = Node(
+        package='twist_mux',
+        executable='twist_mux',
+        name='twist_node',
+        remappings=[
+            ('/cmd_vel_out', '/cmd_vel'),
+        ],
+        parameters=[{
+            'params_file': '/home/sccoutmini/ros2_hum/src/scout_bringup/config/twist_mux.yaml'
+        }]
+    )
+
     return LaunchDescription([
         base_description,
         general_description,
         scout_lidar,
-        slam_launch
+        slam_launch,
+        twist_mux
     ])

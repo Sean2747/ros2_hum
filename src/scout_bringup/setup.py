@@ -26,6 +26,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "nav_pose_publisher = scout_bringup.nav_pose_publisher:main",
+            "nav_waypoints_publisher = scout_bringup.nav_waypoint_publisher:main"
         ],
     },
 )

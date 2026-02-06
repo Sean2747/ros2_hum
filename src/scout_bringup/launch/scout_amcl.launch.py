@@ -28,7 +28,6 @@ def generate_launch_description():
     amcl_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('nav2_bringup'), 'launch', 'localization_launch.py')),
         launch_arguments={'map' : '/home/sccoutmini/ros2_hum/src/scout_bringup/maps/mapOneSave.yaml', 'use_sim_time' : 'false'}.items()
-        #launch_arguments={'map' : os.path.join(get_package_share_directory('scout_bringup'), 'maps', 'mapOneSave.yaml'), 'use_sim_time' : 'false'}.items()
     )
 
     twist_mux = Node(
