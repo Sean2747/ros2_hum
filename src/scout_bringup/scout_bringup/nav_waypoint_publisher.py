@@ -22,32 +22,32 @@ def main(args=None):
 	
 	# Set coordinates for waypoint 1
 	yaw_deg = float(input("Enter vehicle heading for waypoint 1: "))
-	quaternion = quaternion_from_euler(yaw_deg)
+	quaternion = quaternion_from_euler(0,0,yaw_deg)
 
 	goal_pose = PoseStamped()
 	goal_pose.header.frame_id = 'map'
 	goal_pose.header.stamp = navigator.get_clock().now().to_msg()
 	goal_pose.pose.position.x = float(input("Enter waypoint x1: "))
 	goal_pose.pose.position.y = float(input("Enter waypoint y1: "))
-	goal_pose.pose.orientation.x = quaternion.x
-	goal_pose.pose.orientation.y = quaternion.y
-	goal_pose.pose.orientation.z = quaternion.z
-	goal_pose.pose.orientation.w = quaternion.w
+	goal_pose.pose.orientation.x = quaternion[0]
+	goal_pose.pose.orientation.y = quaternion[1]
+	goal_pose.pose.orientation.z = quaternion[2]
+	goal_pose.pose.orientation.w = quaternion[3]
 	goal_poses.append(goal_pose)
 
 	# Set coordinates for waypoint 2
 	yaw_deg = float(input("Enter vehicle heading for waypoint 2: "))
-	quaternion = quaternion_from_euler(yaw_deg)
+	quaternion = quaternion_from_euler(0,0,yaw_deg)
 
 	goal_pose = PoseStamped()
 	goal_pose.header.frame_id = 'map'
 	goal_pose.header.stamp = navigator.get_clock().now().to_msg()
 	goal_pose.pose.position.x = float(input("Enter waypoint x2: "))
 	goal_pose.pose.position.y = float(input("Enter waypoint y2: "))
-	goal_pose.pose.orientation.x = quaternion.x
-	goal_pose.pose.orientation.y = quaternion.y
-	goal_pose.pose.orientation.z = quaternion.z
-	goal_pose.pose.orientation.w = quaternion.w
+	goal_pose.pose.orientation.x = quaternion[0]
+	goal_pose.pose.orientation.y = quaternion[1]
+	goal_pose.pose.orientation.z = quaternion[2]
+	goal_pose.pose.orientation.w = quaternion[3]
 	goal_poses.append(goal_pose)
 
 	navigator.followWaypoints(goal_poses)
