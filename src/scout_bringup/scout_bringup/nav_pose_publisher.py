@@ -1,3 +1,4 @@
+import math
 import rclpy
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from geometry_msgs.msg import PoseStamped
@@ -12,15 +13,15 @@ def main() -> None:
     initial_pose = PoseStamped()
     initial_pose.header.frame_id = 'map'
     initial_pose.header.stamp = navigator.get_clock().now().to_msg()
-    initial_pose.pose.position.x = 0.682
-    initial_pose.pose.position.y = 0.132
-    initial_pose.pose.orientation.z = -1.0
-    initial_pose.pose.orientation.w = 0.000
+    initial_pose.pose.position.x = 0.479
+    initial_pose.pose.position.y = 0.-994
+    initial_pose.pose.orientation.z = 0.0
+    initial_pose.pose.orientation.w = 1.0
     navigator.setInitialPose(initial_pose)
 
     navigator.waitUntilNav2Active()
 
-    yaw_deg = 90
+    yaw_deg = 180
     quaternion = quaternion_from_euler(0, 0, yaw_deg)
 
     goal_pose = PoseStamped()
@@ -96,7 +97,8 @@ def main() -> None:
     else:
         print('Goal has an invalid return status!')
 
-    navigator.lifecycleShutdown()
+    #navigator.lifecycleShutdown()
+    rclpy.shutdown()
 
     exit(0)
 
