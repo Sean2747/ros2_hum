@@ -27,7 +27,7 @@ setup(
     entry_points={
         'console_scripts': [
             "nav_pose_publisher = scout_bringup.nav_pose_publisher:main",
-            "nav_waypoint_publisher = scout_bringup.nav_waypoint_publisher:main"
+            "nav_waypoint_publisher = scout_bringup.nav_waypoint_publisher:main",
             "pose_tracker = scout_bringup.pose_tracker:main"
         ],
     },

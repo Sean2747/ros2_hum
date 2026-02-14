@@ -5,7 +5,8 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 
 class PoseTracker(Node):
     def __init__(self):
-        self.publisher = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.output_data, 10)
+        super().__init__('pose_tracker')
+        self.subscriber = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.output_data, 10)
 
     def output_data(self, data):
         current_x = data.pose.position.x
