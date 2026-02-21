@@ -3,26 +3,34 @@ from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 import rclpy
 from rclpy.duration import Duration
 from tf_transformations import quaternion_from_euler
+import math
 
 def main(args=None):
 	rclpy.init()
 	navigator = BasicNavigator()
 
 	# Estimates the vehicle's current position based on provided pose
+	yaw_deg = float(input("Enter initial vehicle heading: "))
+	yaw_rad = math.radians(yaw_deg)
+	quaternion = quaternion_from_euler(0,0,yaw_rad)
+
 	estimate_pose = PoseStamped()
 	estimate_pose.header.frame_id = 'map'
 	estimate_pose.header.stamp = navigator.get_clock().now().to_msg()
 	estimate_pose.pose.position.x = float(input("Enter initial x position: "))
 	estimate_pose.pose.position.y = float(input("Enter initial y position: ")) 
-	estimate_pose.pose.orientation.z = 0.0
-	estimate_pose.pose.orientation.w = 1.0
+	estimate_pose.pose.orientation.x = quaternion[0]
+	estimate_pose.pose.orientation.y = quaternion[1]
+	estimate_pose.pose.orientation.z = quaternion[2]
+	estimate_pose.pose.orientation.w = quaternion[3]
 	navigator.setInitialPose(estimate_pose)
 
 	goal_poses = []
 	
 	# Set coordinates for waypoint 1
 	yaw_deg = float(input("Enter vehicle heading for waypoint 1: "))
-	quaternion = quaternion_from_euler(0,0,yaw_deg)
+	yaw_rad = math.radians(yaw_deg)
+	quaternion = quaternion_from_euler(0,0,yaw_rad)
 
 	goal_pose = PoseStamped()
 	goal_pose.header.frame_id = 'map'
@@ -37,7 +45,8 @@ def main(args=None):
 
 	# Set coordinates for waypoint 2
 	yaw_deg = float(input("Enter vehicle heading for waypoint 2: "))
-	quaternion = quaternion_from_euler(0,0,yaw_deg)
+	yaw_rad = math.radians(yaw_deg)
+	quaternion = quaternion_from_euler(0,0,yaw_rad)
 
 	goal_pose = PoseStamped()
 	goal_pose.header.frame_id = 'map'
