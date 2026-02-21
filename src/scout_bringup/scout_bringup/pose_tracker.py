@@ -4,6 +4,7 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from tf_transformations import euler_from_quaternion
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import OccupancyGrid
+import math
 
 class PoseTracker(Node):
     def __init__(self):
@@ -25,15 +26,10 @@ class PoseTracker(Node):
             data.pose.pose.orientation.w
         ]
 
-        yaw_deg = euler_from_quaternion(quaternion_values)
+        _, _, yaw_rad = euler_from_quaternion(quaternion_values)
+        yaw_deg = math.degrees(yaw_rad)
 
-        self.get_logger().info(f"({current_x}, {current_y}) | angle: {yaw_deg}")
-        #self.get_logger().info(data)
-
-    def output_map_data(self, data):
-        print("print map")
-        self.get_logger().info("Hello map")
-        self.get_logger().info(data)
+        self.get_logger().info(f"({current_x}, {current_y}) | degrees: {yaw_deg} | radians: {yaw_rad}")
 
 
 def main(args=None):
