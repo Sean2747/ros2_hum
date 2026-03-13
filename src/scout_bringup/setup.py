@@ -29,7 +29,8 @@ setup(
             "nav_pose_publisher = scout_bringup.nav_pose_publisher:main",
             "nav_waypoint_publisher = scout_bringup.nav_waypoint_publisher:main",
             "pose_tracker = scout_bringup.pose_tracker:main",
-            "grid_tracker = scout_bringup.grid_tracker:main"
+            "grid_tracker = scout_bringup.grid_tracker:main",
+            "map_reader = scout_bringup.map_reader:main"
         ],
     },
 )
