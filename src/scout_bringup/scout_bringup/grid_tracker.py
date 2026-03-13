@@ -8,7 +8,7 @@ class GridTracker(Node):
         super().__init__("grid_tracker")
         qos = QoSProfile(depth=10)
         qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
-        self.map_subscriber = self.create_subscription(OccupancyGrid, 'map', self.output_map_data, qos)
+        self.map_subscriber = self.create_subscription(OccupancyGrid, '/map', self.output_map_data, qos)
 
     def output_map_data(self, data):
         self.get_logger().info("Hello map")
