@@ -29,13 +29,13 @@ class MapReader(Node):
 
         x_min = msg.info.origin.position.x
         y_min = msg.info.origin.position.y
-        x_max = math.floor((x_min + width/20)*100)/100
-        y_max = math.floor((y_min + height/20)*100)/100
+        x_max = math.floor((x_min + width*resolution)*100)/100
+        y_max = math.floor((y_min + height*resolution)*100)/100
 
         data = msg.data
         left_col = math.ceil(abs(x_min))
-        right_col = math.ceil(width/20 - abs(x_min))
-        high_row = math.ceil(height/20 - abs(y_min))
+        right_col = math.ceil(width*resolution - abs(x_min))
+        high_row = math.ceil(height*resolution - abs(y_min))
         low_row = math.ceil(abs(y_min))
         cols = left_col + right_col
         rows = high_row + low_row
@@ -46,8 +46,8 @@ class MapReader(Node):
         for r in range(rows):
             row = []
             for c in range(cols):
-                cx = c - 4
-                cy = r - 4
+                cx = c - left_col
+                cy = r - low_row
                 x_left = max(cx, x_min)
                 x_right = min(cx + 1, x_max)
                 y_bottom = max(cy, y_min)
@@ -70,20 +70,21 @@ class MapReader(Node):
                 x_mid = (x_left + x_right) / 2
                 y_mid = (y_bottom + y_top) / 2
 
-                fine_x = int((x_mid - x_min) / resolution)
-                fine_y = int((y_mid - y_min / resolution))
+                fine_x = math.floor((x_mid - x_min) / resolution)
+                fine_y = math.floor((y_mid - y_min) / resolution)
                 index = fine_y * width + fine_x
 
                 occupancy_row.append(data[index-1])
+                #occupancy_row.append((fine_x, fine_y, data[index-1]))
             cell_occupancy.append(occupancy_row)
 
         self.get_logger().info("====== Map Info ======")
         self.get_logger().info(f"Width: {cols} grids")
         self.get_logger().info(f"Height: {rows} grids")
-    #    self.get_logger().info(f"{x_max}")
-    #    self.get_logger().info(f"{y_max}")
-    #   self.get_logger().info(f"{cell_bounds}")
-        for row in cell_occupancy:
+        self.get_logger().info(f"{x_max}")
+        self.get_logger().info(f"{y_max}")
+       #self.get_logger().info(f"{cell_bounds}")
+        for row in reversed(cell_occupancy):
             self.get_logger().info(f"{row}")
 
         self.received = True
