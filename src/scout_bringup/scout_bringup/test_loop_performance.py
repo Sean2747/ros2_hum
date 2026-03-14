@@ -4,11 +4,11 @@ from rclpy.node import Node
 class TestLoopPerformance(Node):
     def __init__(self):
         super().__init__("test_loop_performance")
-        self.output_loop
+        self.output_loop()
 
     def output_loop(self):
         for i in range(0, 20000):
-            self.get_logger().info(i)
+            self.get_logger().info(f"Iteration: {i}")
 
 def main(args=None):
     rclpy.init(args=args)
