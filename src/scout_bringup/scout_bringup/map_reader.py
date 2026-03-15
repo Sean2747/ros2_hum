@@ -74,18 +74,54 @@ class MapReader(Node):
                 fine_y = math.floor((y_mid - y_min) / resolution)
                 index = fine_y * width + fine_x
 
-                occupancy_row.append(data[index-1])
+                occupancy_row.append((data[index-1], math.floor(x_mid*100)/100, math.floor(y_mid*100)/100))
                 #occupancy_row.append((fine_x, fine_y, data[index-1]))
             cell_occupancy.append(occupancy_row)
+
+        #generate map_graph
+        graph = {}
+
+        directions = [
+            (1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1)      #8 directions --> at most 8 neighbors
+        ]
+
+        for row in range(rows):
+            for col in range(cols):
+                occupancy, x_center, y_center = cell_occupancy[row][col]
+
+                neighbors = []
+
+                for dr, dc in directions:
+                    nr = row + dr
+                    nc = col + dc
+                    if 0 <= nr <= (rows-1) and 0 <= nc <= (cols-1):
+                        neighbors.append((nr, nc))
+
+                graph[(row, col)] = {
+                    "occupancy": occupancy,
+                    "visisted": False,
+                    "x_center": x_center,
+                    "y_center": y_center,
+                    "neighbors": neighbors
+                }
 
         self.get_logger().info("====== Map Info ======")
         self.get_logger().info(f"Width: {cols} grids")
         self.get_logger().info(f"Height: {rows} grids")
         self.get_logger().info(f"{x_max}")
         self.get_logger().info(f"{y_max}")
-       #self.get_logger().info(f"{cell_bounds}")
-        for row in reversed(cell_occupancy):
-            self.get_logger().info(f"{row}")
+        #self.get_logger().info(f"{cell_bounds}")
+        #for row in reversed(cell_occupancy):
+        #   self.get_logger().info(f"{row}")
+
+        for vertex_id, info in graph.items():
+            row, col = vertex_id
+            x_center = info["x_center"]
+            y_center = info["y_center"]
+            neighbor_count = len(info["neighbors"])
+            neighbors = info["neighbors"]
+            self.get_logger().info(f"ID: ({row},{col}) | center: ({x_center}, {y_center}) | neighbors#: {neighbor_count} | neighbors: {neighbors}")       
+
 
         self.received = True
 
