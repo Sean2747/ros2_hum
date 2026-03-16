@@ -2,7 +2,9 @@ import rclpy
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
+from std_msgs.msg import String
 import math
+import json
 
 class MapReader(Node):
 
@@ -17,6 +19,12 @@ class MapReader(Node):
             OccupancyGrid,
             '/map',
             self.map_info,
+            qos
+        )
+
+        self.graph_publisher = self.create_publisher(
+            String,
+            '/map_graph',
             qos
         )
 
@@ -99,7 +107,7 @@ class MapReader(Node):
 
                 graph[(row, col)] = {
                     "occupancy": occupancy,
-                    "visisted": False,
+                    "visited": False,
                     "x_center": x_center,
                     "y_center": y_center,
                     "neighbors": neighbors
@@ -114,14 +122,29 @@ class MapReader(Node):
         #for row in reversed(cell_occupancy):
         #   self.get_logger().info(f"{row}")
 
-        for vertex_id, info in graph.items():
-            row, col = vertex_id
-            x_center = info["x_center"]
-            y_center = info["y_center"]
-            neighbor_count = len(info["neighbors"])
-            neighbors = info["neighbors"]
-            self.get_logger().info(f"ID: ({row},{col}) | center: ({x_center}, {y_center}) | neighbors#: {neighbor_count} | neighbors: {neighbors}")       
+        #for vertex_id, info in graph.items():
+        #    row, col = vertex_id
+        #    x_center = info["x_center"]
+        #    y_center = info["y_center"]
+        #    neighbor_count = len(info["neighbors"])
+        #    neighbors = info["neighbors"]
+        #    self.get_logger().info(f"ID: ({row},{col}) | center: ({x_center}, {y_center}) | neighbors#: {neighbor_count} | neighbors: {neighbors}")       
 
+        graph_json = {}
+        for vertex_id, info in graph.items():
+            key = f"{vertex_id[0]},{vertex_id[1]}"
+            graph_json[key] = {
+                "occupancy": info["occupancy"],
+                "visited": info["visited"],
+                "x_center": info["x_center"],
+                "y_center": info["y_center"],
+                "neighbors": info["neighbors"]
+            }
+        
+        msg_out = String()
+        msg_out.data = json.dumps(graph_json)
+        self.graph_publisher.publish(msg_out)
+        self.get_logger().info(f"Published /map_graph")
 
         self.received = True
 
@@ -129,9 +152,9 @@ class MapReader(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = MapReader()
-    while rclpy.ok() and not node.received:
-        rclpy.spin_once(node)
-
+    #while rclpy.ok() and not node.received:
+    #    rclpy.spin_once(node)
+    rclpy.spin(node)
     rclpy.shutdown()
 
 

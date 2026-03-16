@@ -30,6 +30,7 @@ setup(
             "pose_tracker = scout_bringup.pose_tracker:main",
             "grid_tracker = scout_bringup.grid_tracker:main",
             "map_reader = scout_bringup.map_reader:main",
+            "graph_subscriber = scout_bringup.graph_subscriber:main",
             "test_loop_performance = scout_bringup.test_loop_performance:main"
         ],
     },
