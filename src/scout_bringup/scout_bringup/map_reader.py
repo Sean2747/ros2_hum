@@ -28,7 +28,7 @@ class MapReader(Node):
             qos
         )
 
-        self.get_logger().info("Reading /map...")
+        self.get_logger().info("Waiting for /map...")
 
     def map_info(self, msg):
         resolution = msg.info.resolution
