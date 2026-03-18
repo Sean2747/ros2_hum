@@ -90,7 +90,8 @@ class MapReader(Node):
         graph = {}
 
         directions = [
-            (1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1)      #8 directions --> at most 8 neighbors
+           # (1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1)      #8 directions --> at most 8 neighbors
+            (0,-1),(1,0),(0,1),(-1,0)                                   #4 directions --> at most 4 neighbors
         ]
 
         for row in range(rows):

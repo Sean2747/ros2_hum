@@ -32,7 +32,8 @@ setup(
             "map_reader = scout_bringup.map_reader:main",
             "graph_subscriber = scout_bringup.graph_subscriber:main",
             "test_loop_performance = scout_bringup.test_loop_performance:main",
-            "graph_bfs = scout_bringup.graph_bfs:main"
+            "graph_bfs = scout_bringup.graph_bfs:main",
+            "graph_dfs = scout_bringup.graph_dfs:main"
         ],
     },
 )
