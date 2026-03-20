@@ -134,8 +134,10 @@ class ScanMap(Node):
         estimate_pose = PoseStamped()
         estimate_pose.header.frame_id = 'map'
         estimate_pose.header.stamp = navigator.get_clock().now().to_msg()
-        estimate_pose.pose.position.x = float(input("Enter initial x position: "))
-        estimate_pose.pose.position.y = float(input("Enter initial y position: ")) 
+        initial_pose_x = float(input("Enter initial x position: "))
+        initial_pose_y = float(input("Enter initial y position: "))
+        estimate_pose.pose.position.x = initial_pose_x
+        estimate_pose.pose.position.y = initial_pose_y
         estimate_pose.pose.orientation.x = quaternion[0]
         estimate_pose.pose.orientation.y = quaternion[1]
         estimate_pose.pose.orientation.z = quaternion[2]
@@ -145,15 +147,19 @@ class ScanMap(Node):
         goal_poses = []
         navigation_data = json.loads(navigation.data)
         list_of_waypoints = navigation_data['centers']
+        previous_waypoint = [initial_pose_x, initial_pose_y]
 
         # Converts each waypoint into a navigation instruction and adds it to a list
         for waypoint in list_of_waypoints:
+            current_vehicle_angle_orientation = math.degrees(math.atan2(waypoint[1] - previous_waypoint[1], waypoint[0] - previous_waypoint[0]))
+            quaternion = quaternion_from_euler(0, 0, current_vehicle_angle_orientation)
             goal_pose = PoseStamped()
             goal_pose.header.frame_id = 'map'
             goal_pose.header.stamp = navigator.get_clock().now().to_msg()
             goal_pose.pose.position.x = waypoint[0]
             goal_pose.pose.position.y = waypoint[1]
             goal_poses.append(goal_pose)
+            previous_waypoint = waypoint
 
         # Executes navigation instructions in the order of the waypoints were given
         navigator.followWaypoints(goal_poses)
