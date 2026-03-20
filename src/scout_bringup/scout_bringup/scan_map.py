@@ -158,6 +158,10 @@ class ScanMap(Node):
             goal_pose.header.stamp = navigator.get_clock().now().to_msg()
             goal_pose.pose.position.x = waypoint[0]
             goal_pose.pose.position.y = waypoint[1]
+            estimate_pose.pose.orientation.x = quaternion[0]
+            estimate_pose.pose.orientation.y = quaternion[1]
+            estimate_pose.pose.orientation.z = quaternion[2]
+            estimate_pose.pose.orientation.w = quaternion[3]
             goal_poses.append(goal_pose)
             previous_waypoint = waypoint
 
