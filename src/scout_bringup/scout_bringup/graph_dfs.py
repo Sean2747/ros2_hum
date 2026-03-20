@@ -41,7 +41,7 @@ class GraphDFS(Node):
             self.get_logger().error(f'Failed to parse graph JSON: {e}')
             return
 
-        start_vertex_id = (0, 5)   # let user input the starting vertex or automate it
+        start_vertex_id = (6,4)   # let user input the starting vertex or automate it
         vertex_ids, centers = self.dfs_graph(self.graph, start_vertex_id)
 
         self.get_logger().info(f'vertex_ids: {vertex_ids}')

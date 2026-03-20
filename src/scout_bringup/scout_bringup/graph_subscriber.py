@@ -38,9 +38,9 @@ class GraphSubscriber(Node):
                 self.get_logger().info(
                     f"ID: ({vertex_id}) | "
                     f"occupancy: {occupancy} | "
-                    f"visited: {visited} | "
+                    #f"visited: {visited} | "
                     f"center: ({x_center}, {y_center}) | "
-                    f"neighbors: {neighbors}"
+                    #f"neighbors: {neighbors}"
                 )
 
         except Exception as e:

@@ -115,10 +115,12 @@ class MapReader(Node):
                 }
 
         self.get_logger().info("====== Map Info ======")
-        self.get_logger().info(f"Width: {cols} grids")
-        self.get_logger().info(f"Height: {rows} grids")
-        self.get_logger().info(f"{x_max}")
-        self.get_logger().info(f"{y_max}")
+        self.get_logger().info(f"Width: {width} or {cols} grids")
+        self.get_logger().info(f"Height: {height} or {rows} grids")
+        self.get_logger().info(f"X Minimum: {x_min}")
+        self.get_logger().info(f"X Maximum: {x_max}")
+        self.get_logger().info(f"Y Minimum: {y_min}")
+        self.get_logger().info(f"Y Maximum: {y_max}")
         #self.get_logger().info(f"{cell_bounds}")
         #for row in reversed(cell_occupancy):
         #   self.get_logger().info(f"{row}")
