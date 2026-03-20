@@ -97,6 +97,7 @@
 # # - row: 2 | col: 0
 # # - row: 2 | col: 1
 
+import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
@@ -170,3 +171,12 @@ class ScanMap(Node):
             print("Goal was cancelled")
         elif result == TaskResult.FAILED:
             print(f"Goal failed. {navigator.error()}")
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = ScanMap()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
