@@ -86,6 +86,8 @@ class GraphDFS(Node):
                 if not graph[neighbor_id]["visited"]:
                     stack.append(neighbor_id)
 
+        vertex_ids.append(start_vertex_id)                                                          
+        centers.append((graph[start_vertex_id]["x_center"], graph[start_vertex_id]["y_center"]))       #go back to where it begins
         return vertex_ids, centers
 
 def main(args=None):

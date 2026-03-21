@@ -151,17 +151,17 @@ class ScanMap(Node):
 
         # Converts each waypoint into a navigation instruction and adds it to a list
         for waypoint in list_of_waypoints:
-            current_vehicle_angle_orientation = math.degrees(math.atan2(waypoint[1] - previous_waypoint[1], waypoint[0] - previous_waypoint[0]))
+            current_vehicle_angle_orientation = math.radians(math.atan2(waypoint[1] - previous_waypoint[1], waypoint[0] - previous_waypoint[0]))
             quaternion = quaternion_from_euler(0, 0, current_vehicle_angle_orientation)
             goal_pose = PoseStamped()
             goal_pose.header.frame_id = 'map'
             goal_pose.header.stamp = navigator.get_clock().now().to_msg()
             goal_pose.pose.position.x = waypoint[0]
             goal_pose.pose.position.y = waypoint[1]
-            estimate_pose.pose.orientation.x = quaternion[0]
-            estimate_pose.pose.orientation.y = quaternion[1]
-            estimate_pose.pose.orientation.z = quaternion[2]
-            estimate_pose.pose.orientation.w = quaternion[3]
+            goal_pose.pose.orientation.x = quaternion[0]
+            goal_pose.pose.orientation.y = quaternion[1]
+            goal_pose.pose.orientation.z = quaternion[2]
+            goal_pose.pose.orientation.w = quaternion[3]
             goal_poses.append(goal_pose)
             previous_waypoint = waypoint
 
