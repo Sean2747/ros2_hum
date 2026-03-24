@@ -66,6 +66,7 @@ class GraphDFS(Node):
             }
         return graph
 
+
     def dfs_graph(self, graph, start_vertex_id):
 
         stack = deque([start_vertex_id])
@@ -88,7 +89,45 @@ class GraphDFS(Node):
 
         vertex_ids.append(start_vertex_id)                                                          
         centers.append((graph[start_vertex_id]["x_center"], graph[start_vertex_id]["y_center"]))       #go back to where it begins
+        vertex_ids, centers = self.filter_path(vertex_ids, centers)
         return vertex_ids, centers
+
+
+    #simplify vertex_ids[] and centers[]
+    def filter_path(self, vertex_ids, centers):
+        if len(vertex_ids) <= 2:
+            return vertex_ids[:], centers[:]
+
+        filtered_ids = [vertex_ids[0]]
+        filtered_centers = [centers[0]]
+
+        for i in range(1, len(vertex_ids) - 1):
+            prev_id = vertex_ids[i - 1]
+            curr_id = vertex_ids[i]
+            next_id = vertex_ids[i + 1]
+
+            dir1 = (
+                curr_id[0] - prev_id[0],
+                curr_id[1] - prev_id[1]
+            )
+            dir2 = (
+                next_id[0] - curr_id[0],
+                next_id[1] - curr_id[1]
+            )
+
+            # keep turning points
+            if dir1 != dir2:
+                filtered_ids.append(curr_id)
+                filtered_centers.append(centers[i])
+
+        # always last point
+        filtered_ids.append(vertex_ids[-1])
+        filtered_centers.append(centers[-1])
+
+        return filtered_ids, filtered_centers
+
+
+
 
 def main(args=None):
     rclpy.init(args=args)
