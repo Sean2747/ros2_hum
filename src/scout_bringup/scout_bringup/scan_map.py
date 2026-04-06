@@ -107,6 +107,7 @@ from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from tf_transformations import quaternion_from_euler
 import math
+import time
 
 class ScanMap(Node):
     def __init__(self):
@@ -121,6 +122,10 @@ class ScanMap(Node):
             self.navigation_callback,
             qos
         )
+
+        self.current_waypoint_destination = -1
+        self.start_time = -1
+        self.current_time = -1
 
     # Instructs the vehicle to follow lists of coordinates
     def navigation_callback(self, navigation):
@@ -169,9 +174,25 @@ class ScanMap(Node):
         navigator.followWaypoints(goal_poses)
 
         # Prints status of the vehicle's progress
-        while not navigator.isTaskComplete():
-            feedback = navigator.getFeedback()
-            print(feedback)
+        while True: 
+
+            while not navigator.isTaskComplete():
+                feedback = navigator.getFeedback()
+		        current_time = time.time()
+                if self.current_waypoint_destination != feedback.current_waypoint:
+                    self.start_time = time.time()
+                    self.current_waypoint_destination = feedback.current_waypoint
+                    print(f"Currently going to waypoint {self.current_waypoint_destination}")
+                if current_time - start_time >= 7.0:
+                    print(f"taking longer than 7 seconds. Moving on to the next wapoint...")
+                    break
+            else:
+                break
+            
+            goal_poses = goal_poses[self.current_waypoint_destination + 1:]
+            navigator.followWaypoints(goal_poses)
+
+            
 
         # Prints status of the vehicle at the end of the program
         result = navigator.getResult()

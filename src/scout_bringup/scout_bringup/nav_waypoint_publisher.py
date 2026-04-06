@@ -4,8 +4,12 @@ import rclpy
 from rclpy.duration import Duration
 from tf_transformations import quaternion_from_euler
 import math
+import time
 
 def main(args=None):
+	current_waypoint_destination = -1
+	start_time = -1
+	current_time = -1
 	rclpy.init()
 	navigator = BasicNavigator()
 
@@ -59,12 +63,21 @@ def main(args=None):
 	goal_pose.pose.orientation.w = quaternion[3]
 	goal_poses.append(goal_pose)
 
+	print("run1")
 	navigator.followWaypoints(goal_poses)
+	print("run2")
 
 	# Prints status of the vehicle's progress
 	while not navigator.isTaskComplete():
 		feedback = navigator.getFeedback()
-		print(feedback)
+		current_time = time.time()
+		if current_waypoint_destination != feedback.current_waypoint:
+			start_time = time.time()
+			current_waypoint_destination = feedback.current_waypoint
+			print(f"Currently going to waypoint {current_waypoint_destination}")
+		if current_time - start_time >= 2.0:
+			print(f"Taking longer than 2 seconds for waypoint {current_waypoint_destination}")
+
 
 	# Prints status of the vehicle at the end of the program
 	result = navigator.getResult()
