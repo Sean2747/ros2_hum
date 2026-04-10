@@ -178,7 +178,7 @@ class ScanMap(Node):
 
             while not navigator.isTaskComplete():
                 feedback = navigator.getFeedback()
-		        current_time = time.time()
+                current_time = time.time()
                 if self.current_waypoint_destination != feedback.current_waypoint:
                     self.start_time = time.time()
                     self.current_waypoint_destination = feedback.current_waypoint
