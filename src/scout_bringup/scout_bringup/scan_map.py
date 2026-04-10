@@ -156,7 +156,7 @@ class ScanMap(Node):
 
         # Converts each waypoint into a navigation instruction and adds it to a list
         for waypoint in list_of_waypoints:
-            current_vehicle_angle_orientation = math.radians(math.atan2(waypoint[1] - previous_waypoint[1], waypoint[0] - previous_waypoint[0]))
+            current_vehicle_angle_orientation = math.atan2(waypoint[1] - previous_waypoint[1], waypoint[0] - previous_waypoint[0])
             quaternion = quaternion_from_euler(0, 0, current_vehicle_angle_orientation)
             goal_pose = PoseStamped()
             goal_pose.header.frame_id = 'map'
@@ -183,14 +183,14 @@ class ScanMap(Node):
                     self.start_time = time.time()
                     self.current_waypoint_destination = feedback.current_waypoint
                     print(f"Currently going to waypoint {self.current_waypoint_destination}")
-                if current_time - start_time >= 7.0:
-                    print(f"taking longer than 7 seconds. Moving on to the next wapoint...")
-                    break
-            else:
-                break
+#                if current_time - self.start_time >= 12.0:
+#                    print(f"taking too long. Moving on to the next wapoint...")
+#                    break
+#            else:
+#                break
             
-            goal_poses = goal_poses[self.current_waypoint_destination + 1:]
-            navigator.followWaypoints(goal_poses)
+#            goal_poses = goal_poses[self.current_waypoint_destination + 1:]
+#            navigator.followWaypoints(goal_poses)
 
             
 
