@@ -34,7 +34,8 @@ setup(
             "test_loop_performance = scout_bringup.test_loop_performance:main",
             "graph_bfs = scout_bringup.graph_bfs:main",
             "graph_dfs = scout_bringup.graph_dfs:main",
-            "scan_map = scout_bringup.scan_map:main"
+            "scan_map = scout_bringup.scan_map:main",
+            "costmap_snapshot = scout_bringup.costmap_snapshot:main"
         ],
     },
 )
