@@ -30,18 +30,22 @@ class CostmapComparison(Node):
         )
 
     def store_raw_snapshot(self, snapshot):
-        self.raw_costmap_snapshot = snapshot.data
-        self.destroy_subscription(self.live_costmap_subscription)
+        if self.raw_costmap_snapshot is None:
+            self.raw_costmap_snapshot = snapshot.data
+            self.get_logger().info("Saved snapshot")
 
     def compare_raw_costmaps(self, live_costmap):
         raw_live_costmap = live_costmap.data
         list_length = len(raw_live_costmap)
         costmap_differences = list()
+        self.get_logger().info("costmap comparison method is running")
 
         if (self.raw_costmap_snapshot != None) and (raw_live_costmap != self.raw_costmap_snapshot):
             for index in range(list_length):
                 if (raw_live_costmap[index] != self.raw_costmap_snapshot[index]) and (index not in costmap_differences):
                     costmap_differences.append(index)
+
+        self.get_logger().info(f"{costmap_differences}")
 
 def main(args=None):
     rclpy.init(args=args)
