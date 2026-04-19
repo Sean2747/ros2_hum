@@ -35,7 +35,7 @@ class CostmapSnapshot(Node):
             self.snapshot = list(msg.data)
             self.captured = True
             self.get_logger().info('Snapshot taken successfully.')
-            self.get_logger().info(f"list size: {len(self.snapshot)}")
+           #self.get_logger().info(f"list size: {len(self.snapshot)}")
 
     def publish_snapshot(self):
         if self.snapshot is not None:
