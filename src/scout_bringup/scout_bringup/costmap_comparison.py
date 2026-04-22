@@ -42,6 +42,8 @@ class CostmapComparison(Node):
 
     def store_raw_snapshot(self, snapshot):
         if self.raw_costmap_snapshot is None:
+            unique_values = set(snapshot.data)
+            self.get_logger().info(f"Costmap values: {sorted(unique_values)}") 
             self.raw_costmap_snapshot = np.array(snapshot.data)
             self.get_logger().info("Saved snapshot")
 
@@ -57,12 +59,14 @@ class CostmapComparison(Node):
         if (self.raw_costmap_snapshot is not None) and (len(self.costmap_differences) == 0):    
             self.get_logger().info("Costmap comparison method is running")
             raw_live_costmap = np.array(live_costmap.data)                              
-            diff_indices = np.where(raw_live_costmap != self.raw_costmap_snapshot)[0]
+            #diff_indices = np.where(raw_live_costmap != self.raw_costmap_snapshot)[0]       
+            diff_indices = np.where((raw_live_costmap ==100) & (self.raw_costmap_snapshot != 100))[0]     
             self.costmap_differences = diff_indices.tolist()
             self.get_logger().info("Comparison finished")
             #self.get_logger().info(f"{self.costmap_differences}")
 
-            coarse_cells = set()
+            #coarse_cells = set()
+            diff = {}
 
             for index in self.costmap_differences:
                 fine_x = index % self.width
@@ -74,10 +78,17 @@ class CostmapComparison(Node):
                 col = math.floor(world_x) + self.left_col
                 row = math.floor(world_y) + self.low_row
 
-                coarse_cells.add((row, col))
+                #coarse_cells.add((row, col))
+                key = (row, col)
+                if key not in diff:
+                    diff[key] = 1
+                else:
+                    diff[key] += 1
 
-            self.get_logger().info(f"Changed coarse cells: {list(coarse_cells)}")
-            self.get_logger().info(f"#cells: {len(coarse_cells)}") 
+            #self.get_logger().info(f"Changed coarse cells: {list(coarse_cells)}")
+            #self.get_logger().info(f"Differences: {diff}")                   
+            filtered_diff = {k: v for k, v in diff.items() if v >= 10}      #only copy ones with certain# of different pixels
+            self.get_logger().info(f"Differences: {filtered_diff}") 
 
 
 
