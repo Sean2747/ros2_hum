@@ -83,7 +83,7 @@ class CostmapComparison(Node):
                     diff[key] += 1
                     
             #self.get_logger().info(f"Differences: {diff}")                   
-            filtered_diff = {k: v for k, v in diff.items() if v >= 10}      #only copy ones with certain# of different pixels
+            filtered_diff = {k: v for k, v in diff.items() if v >= 15}      #only copy ones with certain# of different pixels
             self.get_logger().info(f"Differences: {filtered_diff}") 
 
 
