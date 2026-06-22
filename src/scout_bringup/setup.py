@@ -36,7 +36,8 @@ setup(
             "graph_dfs = scout_bringup.graph_dfs:main",
             "scan_map = scout_bringup.scan_map:main",
             "costmap_snapshot = scout_bringup.costmap_snapshot:main",
-            "costmap_comparison = scout_bringup.costmap_comparison:main"
+            "costmap_comparison = scout_bringup.costmap_comparison:main",
+            "nav_to_pose = scout_bringup.nav_to_pose:main",
         ],
     },
 )

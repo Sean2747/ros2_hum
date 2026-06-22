@@ -6,6 +6,8 @@ from tf_transformations import quaternion_from_euler
 import math
 import time
 
+#this node is currently not in use
+
 def main(args=None):
 	current_waypoint_destination = -1
 	start_time = -1
