@@ -7,6 +7,7 @@ from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from tf_transformations import quaternion_from_euler
 from std_msgs.msg import Float64MultiArray
 import math
+import json
 
 class NavToPose(Node):
     def __init__(self):
@@ -15,10 +16,12 @@ class NavToPose(Node):
         qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
 
         # only need to check initial position once
-        self.message_received=False
+        self.initial_position_received=False
         self.initial_x = None
         self.initial_y = None
         self.initial_yaw = None
+
+        self.map_dict = None
 
         self.pose_sub=self.create_subscription(
             Float64MultiArray,
@@ -27,19 +30,32 @@ class NavToPose(Node):
             10
         )
 
+        self.graph_sub=self.create_subscription(
+            String,
+            "/map_graph",
+            self.graph_callback,
+            qos,
+        )
+
     def pose_callback(self, msg):
-        if (self.message_received == True):
+        if (self.initial_position_received == True):
             return
         else:
             self.get_logger().info("Subscriber started")
             self.initial_x = msg.data[0]
             self.initial_y = msg.data[1]
             self.initial_yaw = msg.data[2]
-            self.message_received = True
+            self.initial_position_received = True
+            self.get_logger().info("Initial pose set")
+
+    def graph_callback(self, msg):
+        if (self.initial_position_received == True):
+            self.get_logger().info("Reading map_graph")
 
             # Navigate logic
             navigator = BasicNavigator()
 
+            #Get initial pose
             initial_pose = self.create_pose(
                 navigator,
                 self.initial_x,
@@ -52,10 +68,23 @@ class NavToPose(Node):
             self.get_logger().info("Waiting for Nav2 to become active...")
             navigator.waitUntilNav2Active()
 
-            print("\nEnter goal pose below")
-            goal_x = float(input("Goal x: "))
-            goal_y = float(input("Goal y: "))
+            #Get Destination -----older version: let user input goal coordiante
+            # print("\nEnter goal pose below")
+            # goal_x = float(input("Goal x: "))
+            # goal_y = float(input("Goal y: "))
+            # goal_yaw = float(input("Goal yaw in degrees: "))
+
+            self.map_dict = json.loads(msg.data)
+            #print(self.map_dict["0,0"]["x_center"])
+            row = str(input("Goal x: "))
+            col = str(input("Goal y: "))
+            key = row + ',' + col
+
+            goal_x = self.map_dict[key]["x_center"]
+            goal_y = self.map_dict[key]["y_center"]
+
             goal_yaw = float(input("Goal yaw in degrees: "))
+        
 
             goal_pose = self.create_pose(
                 navigator,
@@ -81,6 +110,8 @@ class NavToPose(Node):
                 self.get_logger().info(f"Goal failed! {error_code}: {error_msg}")
             else:
                 self.get_logger().info("Goal has an invalid return status!")
+        else:
+            return
 
     def create_pose(self, navigator, x, y, yaw_deg):
         yaw_rad = math.radians(yaw_deg)
@@ -100,57 +131,6 @@ class NavToPose(Node):
         pose.pose.orientation.w = quaternion[3]
 
         return pose
-
-    # def navigate(self):
-    #     if (self.message_received):
-    #         navigator = BasicNavigator()
-    #
-    #         # print("Enter initial vehicle pose below")
-    #         # initial_x = float(input("Initial x: "))
-    #         # initial_y = float(input("Initial y: "))
-    #         # initial_yaw = float(input("Initial yaw in degrees: "))
-    #
-    #         initial_pose = self.create_pose(
-    #             navigator,
-    #             self.initial_x,
-    #             self.initial_y,
-    #             self.initial_yaw
-    #         )
-    #
-    #         navigator.setInitialPose(initial_pose)
-    #
-    #         self.get_logger().info("Waiting for Nav2 to become active...")
-    #         navigator.waitUntilNav2Active()
-    #
-    #         print("\nEnter goal pose below")
-    #         goal_x = float(input("Goal x: "))
-    #         goal_y = float(input("Goal y: "))
-    #         goal_yaw = float(input("Goal yaw in degrees: "))
-    #
-    #         goal_pose = self.create_pose(
-    #             navigator,
-    #             goal_x,
-    #             goal_y,
-    #             goal_yaw
-    #         )
-    #
-    #         self.get_logger().info("Sending robot to goal...")
-    #         navigator.goToPose(goal_pose)
-    #
-    #         while not navigator.isTaskComplete():
-    #             pass
-    #
-    #         result = navigator.getResult()
-    #
-    #         if result == TaskResult.SUCCEEDED:
-    #             self.get_logger().info("Goal succeeded!")
-    #         elif result == TaskResult.CANCELED:
-    #             self.get_logger().info("Goal was canceled!")
-    #         elif result == TaskResult.FAILED:
-    #             error_code, error_msg = navigator.getTaskError()
-    #             self.get_logger().info(f"Goal failed! {error_code}: {error_msg}")
-    #         else:
-    #             self.get_logger().info("Goal has an invalid return status!")
 
 def main(args=None):
     rclpy.init(args=args)
