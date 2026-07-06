@@ -51,7 +51,7 @@ class NavToPose(Node):
             self.get_logger().info("Initial pose set")
 
             if (self.pending_graph_msg_received):
-                graph_process(self.pending_graph_msg)
+                self.graph_process(self.pending_graph_msg)
 
     def graph_callback(self, msg):
         if (self.initial_position_received == True):
