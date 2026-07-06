@@ -20,6 +20,8 @@ class NavToPose(Node):
         self.initial_x = None
         self.initial_y = None
         self.initial_yaw = None
+        self.pending_graph_msg_received = False
+        self.pending_graph_msg = None
 
         self.map_dict = None
 
@@ -38,7 +40,7 @@ class NavToPose(Node):
         )
 
     def pose_callback(self, msg):
-        if (self.initial_position_received == True):
+        if (self.initial_position_received):
             return
         else:
             self.get_logger().info("Subscriber started")
@@ -48,70 +50,71 @@ class NavToPose(Node):
             self.initial_position_received = True
             self.get_logger().info("Initial pose set")
 
+            if (self.pending_graph_msg_received):
+                graph_process(self.pending_graph_msg)
+
     def graph_callback(self, msg):
         if (self.initial_position_received == True):
-            self.get_logger().info("Reading map_graph")
-
-            # Navigate logic
-            navigator = BasicNavigator()
-
-            #Get initial pose
-            initial_pose = self.create_pose(
-                navigator,
-                self.initial_x,
-                self.initial_y,
-                self.initial_yaw
-            )
-
-            navigator.setInitialPose(initial_pose)
-
-            self.get_logger().info("Waiting for Nav2 to become active...")
-            navigator.waitUntilNav2Active()
-
-            #Get Destination -----older version: let user input goal coordiante
-            # print("\nEnter goal pose below")
-            # goal_x = float(input("Goal x: "))
-            # goal_y = float(input("Goal y: "))
-            # goal_yaw = float(input("Goal yaw in degrees: "))
-
-            self.map_dict = json.loads(msg.data)
-            #print(self.map_dict["0,0"]["x_center"])
-            row = str(input("Goal x: "))
-            col = str(input("Goal y: "))
-            key = row + ',' + col
-
-            goal_x = self.map_dict[key]["x_center"]
-            goal_y = self.map_dict[key]["y_center"]
-
-            goal_yaw = float(input("Goal yaw in degrees: "))
-        
-
-            goal_pose = self.create_pose(
-                navigator,
-                goal_x,
-                goal_y,
-                goal_yaw
-            )
-
-            self.get_logger().info("Sending robot to goal...")
-            navigator.goToPose(goal_pose)
-
-            while not navigator.isTaskComplete():
-                pass
-
-            result = navigator.getResult()
-
-            if result == TaskResult.SUCCEEDED:
-                self.get_logger().info("Goal succeeded!")
-            elif result == TaskResult.CANCELED:
-                self.get_logger().info("Goal was canceled!")
-            elif result == TaskResult.FAILED:
-                error_code, error_msg = navigator.getTaskError()
-                self.get_logger().info(f"Goal failed! {error_code}: {error_msg}")
-            else:
-                self.get_logger().info("Goal has an invalid return status!")
+            self.graph_process(msg)
         else:
-            return
+            self.pending_graph_msg = msg
+            self.pending_graph_msg_received = True
+
+    def graph_process(self, msg):
+         # Navigate logic
+        self.get_logger().info("Processing map_graph...")
+        navigator = BasicNavigator()
+
+        #Get initial pose
+        initial_pose = self.create_pose(
+            navigator,
+            self.initial_x,
+            self.initial_y,
+            self.initial_yaw
+        )
+
+        navigator.setInitialPose(initial_pose)
+
+        self.get_logger().info("Waiting for Nav2 to become active...")
+        navigator.waitUntilNav2Active()
+
+        self.map_dict = json.loads(msg.data)
+        print(self.map_dict["3,6"]["x_center"])
+        print(self.map_dict["3,6"]["y_center"])
+        row = str(input("Goal x: "))
+        col = str(input("Goal y: "))
+        key = row + ',' + col
+
+        goal_x = self.map_dict[key]["x_center"]
+        goal_y = self.map_dict[key]["y_center"]
+
+        goal_yaw = float(input("Goal yaw in degrees: "))
+        
+        goal_pose = self.create_pose(
+            navigator,
+            goal_x,
+            goal_y,
+            goal_yaw
+        )
+
+        self.get_logger().info("Sending robot to goal...")
+        navigator.goToPose(goal_pose)
+
+        while not navigator.isTaskComplete():
+            pass
+
+        result = navigator.getResult()
+
+        if result == TaskResult.SUCCEEDED:
+            self.get_logger().info("Goal succeeded!")
+        elif result == TaskResult.CANCELED:
+            self.get_logger().info("Goal was canceled!")
+        elif result == TaskResult.FAILED:
+            self.get_logger().info(f"Goal failed!")
+        else:
+            self.get_logger().info("Goal has an invalid return status!")
+
+        self.initial_position_received = False
 
     def create_pose(self, navigator, x, y, yaw_deg):
         yaw_rad = math.radians(yaw_deg)
