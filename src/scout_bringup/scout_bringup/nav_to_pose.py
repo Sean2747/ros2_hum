@@ -22,6 +22,7 @@ class NavToPose(Node):
         self.initial_yaw = None
         self.pending_graph_msg_received = False
         self.pending_graph_msg = None
+        self.navigator = BasicNavigator()
 
         self.map_dict = None
 
@@ -63,20 +64,20 @@ class NavToPose(Node):
     def graph_process(self, msg):
          # Navigate logic
         self.get_logger().info("Processing map_graph...")
-        navigator = BasicNavigator()
+        
 
         #Get initial pose
         initial_pose = self.create_pose(
-            navigator,
+            self.navigator,
             self.initial_x,
             self.initial_y,
             self.initial_yaw
         )
 
-        navigator.setInitialPose(initial_pose)
+        self.navigator.setInitialPose(initial_pose)
 
         self.get_logger().info("Waiting for Nav2 to become active...")
-        navigator.waitUntilNav2Active()
+        self.navigator.waitUntilNav2Active()
 
         self.map_dict = json.loads(msg.data)
         print(self.map_dict["3,6"]["x_center"])
@@ -91,19 +92,19 @@ class NavToPose(Node):
         goal_yaw = float(input("Goal yaw in degrees: "))
         
         goal_pose = self.create_pose(
-            navigator,
+            self.navigator,
             goal_x,
             goal_y,
             goal_yaw
         )
 
         self.get_logger().info("Sending robot to goal...")
-        navigator.goToPose(goal_pose)
+        self.navigator.goToPose(goal_pose)
 
-        while not navigator.isTaskComplete():
+        while not self.navigator.isTaskComplete():
             pass
 
-        result = navigator.getResult()
+        result = self.navigator.getResult()
 
         if result == TaskResult.SUCCEEDED:
             self.get_logger().info("Goal succeeded!")
