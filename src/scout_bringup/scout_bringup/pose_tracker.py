@@ -6,6 +6,8 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Float64MultiArray
 import math
+import os
+import yaml
 
 class PoseTracker(Node):
     def __init__(self):
@@ -15,13 +17,31 @@ class PoseTracker(Node):
         self.scout_pose_msg = Float64MultiArray()
         self.create_timer(0.5, self.publish_pose)
 
-        self.amcl_subscriber = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.output_amcl_data, qos)
+        self.amcl_subscriber = self.create_subscription(
+            PoseWithCovarianceStamped, 
+            '/amcl_pose', 
+            self.output_amcl_data, 
+            qos
+        )
 
         self.scout_pose_publisher = self.create_publisher(
             Float64MultiArray,
             '/scout_pose',
             10
         )
+
+        map_yaml = "/home/sccoutmini/ros2_hum/src/scout_bringup/maps/newlab07202026.yaml"
+
+        with open(map_yaml, "r") as file:
+            map_data = yaml.safe_load(file)
+
+        origin = map_data["origin"]
+        self.origin_x = origin[0]
+        self.origin_y = origin[1]
+
+        #self.get_logger().info(f"{self.origin_x}, {self.origin_y}")
+
+
 
     def output_amcl_data(self, data):
         self.get_logger().info("Hello amcl")
@@ -38,8 +58,15 @@ class PoseTracker(Node):
         _, _, yaw_rad = euler_from_quaternion(quaternion_values)
         yaw_deg = math.degrees(yaw_rad)
 
-        self.get_logger().info(f"({current_x}, {current_y}) | degrees: {yaw_deg} | radians: {yaw_rad}")
-        self.scout_pose_msg.data = [current_x,current_y,yaw_deg]
+        row = math.ceil(current_y - self.origin_y) - 1
+        col = math.ceil(current_x - self.origin_x) - 1
+
+        self.get_logger().info(f"({current_x}, {current_y}) | degrees: {yaw_deg} | radians: {yaw_rad} | grid index: {row}, {col}")
+        
+        row = float(row)
+        col = float(col) 
+        
+        self.scout_pose_msg.data = [current_x,current_y,yaw_deg,row,col]
 
     def publish_pose(self):
             self.scout_pose_publisher.publish(self.scout_pose_msg)

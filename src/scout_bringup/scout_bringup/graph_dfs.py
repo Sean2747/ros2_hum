@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from std_msgs.msg import String
+from std_msgs.msg import Float64MultiArray
 import json
 from collections import deque
 
@@ -12,11 +13,21 @@ class GraphDFS(Node):
         qos = QoSProfile(depth=10)
         qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
 
+        self.origin_x
+        self.origin_y
+
         self.subscription = self.create_subscription(
             String,
             '/map_graph',
             self.dfs_callback,
             qos
+        )
+
+        self.tracker_subscriber = self.create_subscription(
+            Float64MultiArray,
+            '/scout_pose',
+            self.tracker_callback,
+            10
         )
 
         self.result_publisher = self.create_publisher(
@@ -28,6 +39,13 @@ class GraphDFS(Node):
         self.received = False
         self.graph = {}
         self.get_logger().info('Waiting for /map_graph...')
+
+    def tracker_callback(self, msg):
+        self.get_logger().info("Subscriber started")
+        self.origin_x = msg.data[4]
+        self.origin_y = msg.data[5]
+
+        self.get_logger().info(f'{self.origin_x} | {self.origin_y}')
 
     def dfs_callback(self, msg):
         if self.received:

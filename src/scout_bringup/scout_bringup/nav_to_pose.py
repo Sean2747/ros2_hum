@@ -80,8 +80,8 @@ class NavToPose(Node):
         self.navigator.waitUntilNav2Active()
 
         self.map_dict = json.loads(msg.data)
-        print(self.map_dict["3,6"]["x_center"])
-        print(self.map_dict["3,6"]["y_center"])
+        #print(self.map_dict["3,6"]["x_center"])
+        #print(self.map_dict["3,6"]["y_center"])
         row = str(input("Goal x: "))
         col = str(input("Goal y: "))
         key = row + ',' + col
