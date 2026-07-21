@@ -28,9 +28,19 @@ class MapReader(Node):
             qos
         )
 
+        self.msg_out = None
+        self.timer = self.create_timer(
+            1.0,
+            self.publish_graph
+        )
+
         self.get_logger().info("Waiting for /map...")
 
     def map_info(self, msg):
+        if self.received:
+            return
+
+
         resolution = msg.info.resolution
         width = msg.info.width
         height = msg.info.height
@@ -121,17 +131,6 @@ class MapReader(Node):
         self.get_logger().info(f"X Maximum: {x_max}")
         self.get_logger().info(f"Y Minimum: {y_min}")
         self.get_logger().info(f"Y Maximum: {y_max}")
-        #self.get_logger().info(f"{cell_bounds}")
-        #for row in reversed(cell_occupancy):
-        #   self.get_logger().info(f"{row}")
-
-        #for vertex_id, info in graph.items():
-        #    row, col = vertex_id
-        #    x_center = info["x_center"]
-        #    y_center = info["y_center"]
-        #    neighbor_count = len(info["neighbors"])
-        #    neighbors = info["neighbors"]
-        #    self.get_logger().info(f"ID: ({row},{col}) | center: ({x_center}, {y_center}) | neighbors#: {neighbor_count} | neighbors: {neighbors}")       
 
         graph_json = {}
         for vertex_id, info in graph.items():
@@ -144,13 +143,14 @@ class MapReader(Node):
                 "neighbors": info["neighbors"]
             }
         
-        msg_out = String()
-        msg_out.data = json.dumps(graph_json)
-        self.graph_publisher.publish(msg_out)
-        self.get_logger().info(f"Published /map_graph")
-
+        self.msg_out = String()
+        self.msg_out.data = json.dumps(graph_json)
         self.received = True
 
+    def publish_graph(self):
+        if self.msg_out is not None:
+            self.graph_publisher.publish(self.msg_out)
+            #self.get_logger().info(f"Published /map_graph")
 
 def main(args=None):
     rclpy.init(args=args)

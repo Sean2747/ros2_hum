@@ -13,20 +13,17 @@ class GraphDFS(Node):
         qos = QoSProfile(depth=10)
         qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
 
-        self.origin_x
-        self.origin_y
-
         self.subscription = self.create_subscription(
             String,
             '/map_graph',
-            self.dfs_callback,
+            self.graph_callback,
             qos
         )
 
-        self.tracker_subscriber = self.create_subscription(
+        self.pose_subscriber = self.create_subscription(
             Float64MultiArray,
             '/scout_pose',
-            self.tracker_callback,
+            self.pose_callback,
             10
         )
 
@@ -38,20 +35,28 @@ class GraphDFS(Node):
 
         self.received = False
         self.graph = {}
-        self.get_logger().info('Waiting for /map_graph...')
+        self.pose_received = False
+        self.start_vertex_id = False
 
-    def tracker_callback(self, msg):
+    def pose_callback(self, msg):
+        if self.pose_received:
+            return
+        self.pose_received = True
+
         self.get_logger().info("Subscriber started")
-        self.origin_x = msg.data[4]
-        self.origin_y = msg.data[5]
+        origin_x = int(msg.data[3])
+        origin_y = int(msg.data[4])
 
-        self.get_logger().info(f'{self.origin_x} | {self.origin_y}')
+        self.start_vertex_id = (origin_x, origin_y)
+        self.get_logger().info(f'Start vertex: {self.start_vertex_id}')
 
-    def dfs_callback(self, msg):
+    def graph_callback(self, msg):
         if self.received:
             return
 
-        self.received = True
+        if not self.pose_received:
+            self.get_logger().info('Waiting for scout pose...')
+            return
 
         try:
             self.graph = self.convert_graph(json.loads(msg.data))       
@@ -59,8 +64,9 @@ class GraphDFS(Node):
             self.get_logger().error(f'Failed to parse graph JSON: {e}')
             return
 
-        start_vertex_id = (3,6)   # let user input the starting vertex or automate it
-        vertex_ids, centers = self.dfs_graph(self.graph, start_vertex_id)
+        self.received = True
+        #start_vertex_id = (3,6)   # let user input the starting vertex or automate it
+        vertex_ids, centers = self.dfs_graph(self.graph, self.start_vertex_id)
 
         self.get_logger().info(f'vertex_ids: {vertex_ids}')
         self.get_logger().info(f'centers: {centers}')
@@ -68,6 +74,8 @@ class GraphDFS(Node):
         msg_out = String()
         msg_out.data = json.dumps({'vertex_ids': vertex_ids, 'centers': centers})
         self.result_publisher.publish(msg_out)
+
+
 
     def convert_graph(self, raw_graph):     #converts json-loaded graph into a dict w/ tuple IDs
         graph = {}
@@ -83,7 +91,6 @@ class GraphDFS(Node):
                 'neighbors': [tuple(n) for n in info['neighbors']]
             }
         return graph
-
 
     def dfs_graph(self, graph, start_vertex_id):
 

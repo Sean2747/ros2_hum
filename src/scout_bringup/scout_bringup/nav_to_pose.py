@@ -55,6 +55,8 @@ class NavToPose(Node):
                 self.graph_process(self.pending_graph_msg)
 
     def graph_callback(self, msg):
+        if self.pending_graph_msg_received:
+            return
         if (self.initial_position_received == True):
             self.graph_process(msg)
         else:
@@ -116,6 +118,7 @@ class NavToPose(Node):
             self.get_logger().info("Goal has an invalid return status!")
 
         self.initial_position_received = False
+        self.pending_graph_msg_received = False
 
     def create_pose(self, navigator, x, y, yaw_deg):
         yaw_rad = math.radians(yaw_deg)
