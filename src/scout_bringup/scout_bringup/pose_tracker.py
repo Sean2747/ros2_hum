@@ -30,9 +30,10 @@ class PoseTracker(Node):
             10
         )
 
-        map_yaml = "/home/sccoutmini/ros2_hum/src/scout_bringup/maps/newlab07202026.yaml"
+        self.declare_parameter("map_path", "")
+        map_path = self.get_parameter("map_path").value
 
-        with open(map_yaml, "r") as file:
+        with open(map_path, "r") as file:
             map_data = yaml.safe_load(file)
 
         origin = map_data["origin"]
