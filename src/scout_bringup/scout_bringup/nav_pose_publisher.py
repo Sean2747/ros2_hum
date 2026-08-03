@@ -5,7 +5,7 @@ from geometry_msgs.msg import PoseStamped
 from rclpy.duration import Duration
 from tf_transformations import quaternion_from_euler
 
-#this node is currently not in use
+#this node is currently NOT in use
 
 def main() -> None:
     rclpy.init()

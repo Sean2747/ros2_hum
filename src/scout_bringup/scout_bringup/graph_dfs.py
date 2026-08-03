@@ -33,10 +33,13 @@ class GraphDFS(Node):
             qos
         )
 
+        self.create_timer(1.0,self.publish_dfs_result)
+
         self.received = False
         self.graph = {}
         self.pose_received = False
         self.start_vertex_id = False
+        self.msg_out = String()
 
     def pose_callback(self, msg):
         if self.pose_received:
@@ -71,11 +74,10 @@ class GraphDFS(Node):
         self.get_logger().info(f'vertex_ids: {vertex_ids}')
         self.get_logger().info(f'centers: {centers}')
 
-        msg_out = String()
-        msg_out.data = json.dumps({'vertex_ids': vertex_ids, 'centers': centers})
-        self.result_publisher.publish(msg_out)
+        self.msg_out.data = json.dumps({'vertex_ids': vertex_ids, 'centers': centers})
 
-
+    def publish_dfs_result(self):
+        self.result_publisher.publish(self.msg_out)
 
     def convert_graph(self, raw_graph):     #converts json-loaded graph into a dict w/ tuple IDs
         graph = {}
