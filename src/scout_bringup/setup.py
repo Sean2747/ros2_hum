@@ -37,6 +37,7 @@ setup(
             "costmap_snapshot = scout_bringup.costmap_snapshot:main",
             "costmap_comparison = scout_bringup.costmap_comparison:main",
             "nav_to_pose = scout_bringup.nav_to_pose:main",
+            "nav_multi_pose = scout_bringup.nav_multi_pose:main",
         ],
     },
 )
