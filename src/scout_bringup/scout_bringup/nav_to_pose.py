@@ -82,16 +82,34 @@ class NavToPose(Node):
         self.navigator.waitUntilNav2Active()
 
         self.map_dict = json.loads(msg.data)
-        #print(self.map_dict["3,6"]["x_center"])
-        #print(self.map_dict["3,6"]["y_center"])
-        row = str(input("Goal x: "))
-        col = str(input("Goal y: "))
-        key = row + ',' + col
+
+        while True:
+            row = str(input("Goal x: "))
+            col = str(input("Goal y: "))
+            key = row + ',' + col
+
+            if key not in self.map_dict:
+                print("Invalid grid. Please enter an existing grid.")
+                continue
+
+            if self.map_dict[key]["occupancy"] != 0:
+                print("Grid is not free. Please choose another grid.")
+                continue
+
+            break
 
         goal_x = self.map_dict[key]["x_center"]
         goal_y = self.map_dict[key]["y_center"]
 
-        goal_yaw = float(input("Goal yaw in degrees: "))
+
+        while True:
+            yaw_input = input("Goal orientation in degrees: ")
+
+            if yaw_input.lstrip("-").replace(".", "", 1).isdigit():
+                goal_yaw = float(yaw_input)
+                break
+            else:
+                print("Invalid orientation. Please enter a number.")
         
         goal_pose = self.create_pose(
             self.navigator,
@@ -101,6 +119,7 @@ class NavToPose(Node):
         )
 
         self.get_logger().info("Sending robot to goal...")
+
         self.navigator.goToPose(goal_pose)
 
         while not self.navigator.isTaskComplete():

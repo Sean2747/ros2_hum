@@ -99,7 +99,7 @@ class NavMultiPose(Node):
             self.get_logger().info(f"goal_x: {goal_x} goal_y: {goal_y}, goal_yaw: {goal_yaw}")
 
             self.get_logger().info("Sending robot to goal...")
-            #self.navigator.goToPose(goal_pose)
+            #self.navigator.goToPose(goal_pose)                 #uncomment this to allow real navigation
 
             self.initial_x = goal_x
             self.initial_y = goal_y
