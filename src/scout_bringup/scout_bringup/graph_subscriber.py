@@ -4,7 +4,7 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 from std_msgs.msg import String
 import json
 
-
+#This is a test node used to print out the map graph 
 class GraphSubscriber(Node):
 
     def __init__(self):

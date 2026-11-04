@@ -38,6 +38,9 @@ setup(
             "costmap_comparison = scout_bringup.costmap_comparison:main",
             "nav_to_pose = scout_bringup.nav_to_pose:main",
             "nav_multi_pose = scout_bringup.nav_multi_pose:main",
+            'costmap_snapshot_v2 = scout_bringup.costmap_snapshot_v2:main',
+            'costmap_validation = scout_bringup.costmap_validation:main',
+            'trigger_node = scout_bringup.trigger_node:main'
         ],
     },
 )

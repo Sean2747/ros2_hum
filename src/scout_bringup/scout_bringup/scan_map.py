@@ -39,6 +39,13 @@ class ScanMap(Node):
         self.dfs_result_received = False
         self.navigator = BasicNavigator()
 
+        # Send signal when second patrol is complete
+        self.patrol_complete_publisher = self.create_publisher(
+            String,
+            '/patrol_complete',
+            10
+        )
+
     def pose_callback(self, msg):
         if (self.initial_position_received):
             return

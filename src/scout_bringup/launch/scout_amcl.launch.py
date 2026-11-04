@@ -26,6 +26,7 @@ def generate_launch_description():
     )
 
     map_path = os.getenv("MAP_PATH")
+    print("Mappath from .env: ", map_path)
 
     amcl_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('nav2_bringup'), 'launch', 'localization_launch.py')),
