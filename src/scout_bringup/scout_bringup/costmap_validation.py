@@ -23,14 +23,14 @@ class CostmapValidation(Node):
         self.y_min = None
         self.left_col = None
         self.low_row = None
-         
+        
 
         qos = QoSProfile(depth=10)
         qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
 
         self.snapshot_costmap_subscription = self.create_subscription(
             OccupancyGrid,
-            '/costmap_snapshot_v2',  # separate occupancygrid snapshot topic
+            '/snapshot_before',  # separate occupancygrid snapshot topic
             self.store_raw_snapshot,
             qos
         )

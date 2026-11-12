@@ -10,29 +10,23 @@ class CostmapSnapshotV2(Node):
 
     def __init__(self):
         super().__init__('costmap_snapshot_v2')
-        qos = QoSProfile(depth=10)
-        qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
+        self.qos = QoSProfile(depth=10)
+        self.qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
 
         self.subscription = self.create_subscription(
             OccupancyGrid,
             '/global_costmap/costmap',
             self.costmap_callback,
-            qos
+            self.qos
         )
 
         self.publisher = self.create_publisher(
             OccupancyGrid, # modified to OccupancyGrid
-            '/costmap_snapshot_v2',
-            qos
+            '/snapshot_before',
+            self.qos
         )
 
         # JUST ADDED ___________________________________________
-
-        self.snapshot_after_publisher = self.create_publisher(
-            OccupancyGrid,
-            '/snapshot_after',
-            qos
-        )
 
         # Listen for patrol completion signal
         self.patrol_complete_subscription = self.create_subscription(
@@ -70,6 +64,13 @@ class CostmapSnapshotV2(Node):
         if self.snapshot_before is not None and self.snapshot_after is None:
             self.get_logger().info('Patrol completion signal received.')
             self.captured_after = True
+
+        # MOVED
+        self.snapshot_after_publisher = self.create_publisher(
+            OccupancyGrid,
+            '/snapshot_after',
+            self.qos
+        )
 
     def publish_snapshot(self):
         if self.snapshot_before is not None:

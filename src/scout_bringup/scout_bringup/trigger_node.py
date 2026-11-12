@@ -15,7 +15,7 @@ class TriggerNode(Node):
     def publish_signal(self):
         msg=Empty()
         self.publisher.publish(msg)
-        self.get_logger().info(f"signal_sent")
+        self.get_logger().info(f"signal sent")
     
 def main(args=None):
         rclpy.init(args=args)
