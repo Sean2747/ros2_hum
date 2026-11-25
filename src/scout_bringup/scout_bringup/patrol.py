@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from std_msgs.msg import Empty
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 import json
 from geometry_msgs.msg import PoseStamped
@@ -41,8 +42,8 @@ class ScanMap(Node):
 
         # Send signal when second patrol is complete
         self.patrol_complete_publisher = self.create_publisher(
-            String,
-            '/patrol_complete',
+            Empty,
+            "patrol_complete",
             10
         )
 
@@ -99,41 +100,40 @@ class ScanMap(Node):
         self.navigator.followWaypoints(goal_poses)
 
         # Prints status of the vehicle's progress
-        while True: 
+        while not self.navigator.isTaskComplete():
+            feedback = self.navigator.getFeedback()
 
-            while not self.navigator.isTaskComplete():
-                feedback = self.navigator.getFeedback()
-                current_time = time.time()
+            if feedback is not None:
                 if self.current_waypoint_destination != feedback.current_waypoint:
                     self.start_time = time.time()
                     self.current_waypoint_destination = feedback.current_waypoint
-                    print(f"Currently going to waypoint {self.current_waypoint_destination}")
-#                if current_time - self.start_time >= 12.0:
-#                    print(f"taking too long. Moving on to the next wapoint...")
-#                    break
-#            else:
-#                break
-            
-#            goal_poses = goal_poses[self.current_waypoint_destination + 1:]
-#            self.navigator.followWaypoints(goal_poses)
+                    self.get_logger().info(f"Currently going to waypoint {self.current_waypoint_destination}")
 
-            
+            time.sleep(0.1)
 
         # Prints status of the vehicle at the end of the program
         result = self.navigator.getResult()
         if result == TaskResult.SUCCEEDED:
-            print("Goal succeeded")
+            print("Patrol succeeded")
+            msg = Empty()
+            self.patrol_complete_publisher.publish(msg)
+            self.get_logger().info("Published /patrol_complete")
+
         elif result == TaskResult.CANCELED:
-            print("Goal was cancelled")
+            print("Patrol was cancelled")
         elif result == TaskResult.FAILED:
-            print(f"Goal failed. {self.navigator.error()}")
+            print(f"Patrol failed. {self.navigator.error()}")
 
-
+    #dummy callback
     def navigation_callback2(self, navigation):
         if (self.dfs_result_received) or (not self.initial_position_received):
             return
         self.dfs_result_received = True
         print("Dummy navigation callback")
+
+        msg = Empty()
+        self.patrol_complete_publisher.publish(msg)
+        self.get_logger().info("Published /patrol_complete")
 
 def main(args=None):
     rclpy.init(args=args)

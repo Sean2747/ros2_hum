@@ -203,6 +203,7 @@ class CostmapComparisonV2(Node):
 
         #Convert indices: fine --> coarse
         coarse_cells = self.convert_to_coarse_indices(changed_cells)
+        self.get_logger().info(f"Number of changes detected: {len(coarse_cells)}")
         self.get_logger().info(f"Cells after coarse conversion: {coarse_cells}")
   
     def convert_to_coarse_indices(self, changed_cells):

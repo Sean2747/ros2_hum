@@ -153,9 +153,6 @@ class GraphDFS(Node):
 
         return filtered_ids, filtered_centers
 
-
-
-
 def main(args=None):
     rclpy.init(args=args)
     node = GraphDFS()
