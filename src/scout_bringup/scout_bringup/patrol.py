@@ -28,7 +28,7 @@ class ScanMap(Node):
         self.navigation_subscription = self.create_subscription(
             String,
             '/dfs_result',   # Can replace with bfs_result
-            self.navigation_callback2,
+            self.navigation_callback,
             qos
         )
 
@@ -36,6 +36,8 @@ class ScanMap(Node):
         self.start_time = -1
         self.current_time = -1
 
+        self.initial_pose_x = None
+        self.initial_pose_y = None
         self.initial_position_received = False
         self.dfs_result_received = False
         self.navigator = BasicNavigator()
@@ -64,6 +66,8 @@ class ScanMap(Node):
         estimate_pose.pose.orientation.w = quaternion[3]
         self.navigator.setInitialPose(estimate_pose)
 
+        self.initial_pose_x = msg.data[0]
+        self.initial_pose_y = msg.data[1]
         self.initial_position_received = True
         self.get_logger().info("Initial pose set")
 
@@ -78,7 +82,7 @@ class ScanMap(Node):
         goal_poses = []
         navigation_data = json.loads(navigation.data)
         list_of_waypoints = navigation_data['centers']
-        previous_waypoint = [initial_pose_x, initial_pose_y]
+        previous_waypoint = [self.initial_pose_x, self.initial_pose_y]
 
         # Converts each waypoint into a navigation instruction and adds it to a list
         for waypoint in list_of_waypoints:

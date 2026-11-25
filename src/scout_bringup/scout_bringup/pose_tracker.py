@@ -59,8 +59,8 @@ class PoseTracker(Node):
         _, _, yaw_rad = euler_from_quaternion(quaternion_values)
         yaw_deg = math.degrees(yaw_rad)
 
-        row = math.ceil(current_y - self.origin_y) - 1
-        col = math.ceil(current_x - self.origin_x) - 1
+        row = math.ceil(current_y - self.origin_y)
+        col = math.ceil(current_x - self.origin_x)
 
         self.get_logger().info(f"({current_x}, {current_y}) | degrees: {yaw_deg} | radians: {yaw_rad} | grid index: {row}, {col}")
         
