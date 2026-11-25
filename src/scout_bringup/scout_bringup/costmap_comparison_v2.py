@@ -9,11 +9,13 @@ class CostmapComparisonV2(Node):
     def __init__(self):
         super().__init__('costmap_comparison_v2')
 
-        self.cell_size = 0.5  # Define the size of each coarse cell
+        self.cell_size = 0.25  # Define the size of each coarse cell
         self.graph_before = None
         self.graph_after = None
         self.snapshot_before_received = False
         self.snapshot_after_received = False
+        self.x_min = None
+        self.y_min = None
 
         qos = QoSProfile(depth=10)
         qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
@@ -40,11 +42,17 @@ class CostmapComparisonV2(Node):
         self.graph_before = self.grid_to_dict(msg)
         self.snapshot_before_received = True
 
+        if self.snapshot_after_received is not None:    #in case if the receiving order is incorrect
+            self.compare_costmaps()
+
     def snapshot_after_callback(self, msg):
         if self.snapshot_after_received:
             return
         self.graph_after = self.grid_to_dict(msg)
         self.snapshot_after_received = True
+
+        if self.snapshot_before_received is not None:
+            self.compare_costmaps()
 
     def grid_to_dict(self, msg):
         resolution = msg.info.resolution
@@ -98,9 +106,8 @@ class CostmapComparisonV2(Node):
                 index = fine_y * width + fine_x
 
                 #only accept 0, 100, -1 as possible occupancy values
-                #anything larger than 0 is 100
-                if data[index-1] > 0:
-                    occupancy = 100
+                if data[index-1] > 0 and data[index-1] < 100:
+                    occupancy = 0
                 else:
                     occupancy = data[index-1]
 
@@ -135,7 +142,7 @@ class CostmapComparisonV2(Node):
                 #    "neighbors": neighbors
                 }
 
-        #self.get_logger().info(f"{graph}")     #uncomment to check the entire dictionary
+        #self.get_logger().info(f"{graph}")     #uncomment to print the entire dictionary
 
         self.get_logger().info("====== Costmap Info ======")
         self.get_logger().info(f"Width: {width} or {cols} grids")
@@ -145,7 +152,73 @@ class CostmapComparisonV2(Node):
         self.get_logger().info(f"Y Minimum: {y_min}")
         self.get_logger().info(f"Y Maximum: {y_max}")
 
+        self.x_min = x_min
+        self.y_min = y_min
+
         return graph
+
+    def compare_costmaps(self):
+        self.get_logger().info("Comparison begins")
+        if self.graph_before is None or self.graph_after is None:
+            self.get_logger().info("Cannot compare yet.")
+            return
+
+        #Store all fine cells that changed from free (0) to occupied (100)
+        changed_cells = set()
+
+        for index in self.graph_after:   #both graphs should have the same set of indices
+            before_occupancy = self.graph_before[index]["occupancy"]
+            after_occupancy = self.graph_after[index]["occupancy"]
+            if before_occupancy == 0 and after_occupancy == 100:
+                changed_cells.add(index)
+
+        self.get_logger().info(f"Free-to-occupied cells before filtering: {changed_cells}")
+
+        #Keep only changed cells with at least one changed neighbor
+        directions = [
+            (-1,-1),
+            (-1, 0),
+            (-1, 1),
+
+            ( 0,-1),
+            ( 0, 1),
+
+            ( 1,-1),
+            ( 1, 0),
+            ( 1, 1)
+        ]
+
+        for row, col in list(changed_cells):
+            for row_change, col_change in directions:
+                neighbor = (
+                row + row_change,
+                col + col_change
+                )
+                if neighbor in changed_cells:
+                    break
+            else:
+                changed_cells.discard((row, col))
+
+        self.get_logger().info(f"Cells after neighbor filtering: {changed_cells}")
+
+        #Convert indices: fine --> coarse
+        coarse_cells = self.convert_to_coarse_indices(changed_cells)
+        self.get_logger().info(f"Cells after coarse conversion: {coarse_cells}")
+  
+    def convert_to_coarse_indices(self, changed_cells):
+        coarse_cells = set()
+        coarse_cell_size = 1.0
+        coarse_left_col = math.ceil(abs(self.x_min) / coarse_cell_size)
+        coarse_low_row = math.ceil(abs(self.y_min) / coarse_cell_size)
+
+        for row, col in list(changed_cells):
+            x_center = self.graph_after[(row, col)]["x_center"]
+            y_center = self.graph_after[(row, col)]["y_center"]
+            coarse_col = math.floor(x_center / coarse_cell_size) + coarse_left_col
+            coarse_row = math.floor(y_center / coarse_cell_size)  + coarse_low_row
+            coarse_cells.add((coarse_row, coarse_col))
+            changed_cells.discard((row, col))
+        return coarse_cells
 
 def main(args=None):
     rclpy.init(args=args)
